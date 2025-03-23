@@ -64,9 +64,13 @@
             pkgs.pkg-config
             pkgs.lld
             pkgs.libgcc
+            pkgs.xdo
+            pkgs.xdotool
           ];
           LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.openssl ];
-          RUSTFLAGS = "-C link-arg=-fuse-ld=lld";
+          RUSTFLAGS = "-C link-arg=-fuse-ld=lld -C linker=clang";
+          GSK_RENDERER = "ngl";
+          GDK_BACKEND = "x11";
           # Additional environment variables can be set directly
           # MY_CUSTOM_VAR = "some value";
         };
