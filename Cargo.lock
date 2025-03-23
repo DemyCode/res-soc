@@ -8499,6 +8499,8 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-cli",
+ "reqwest 0.12.15",
+ "serde",
 ]
 
 [[package]]

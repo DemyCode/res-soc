@@ -63,9 +63,10 @@
             pkgs.openssl
             pkgs.pkg-config
             pkgs.lld
+            pkgs.libgcc
           ];
           LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.openssl ];
-          RUSTFLAGS = "-C linker=lld";
+          RUSTFLAGS = "-C link-arg=-fuse-ld=lld";
           # Additional environment variables can be set directly
           # MY_CUSTOM_VAR = "some value";
         };
