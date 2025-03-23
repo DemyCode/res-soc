@@ -1,14 +1,11 @@
 [package]
-authors = ["Mehdi Bekhtaoui <verycols@gmail.com>"]
-edition = "2021"
-# If you change the name here, you must also do it in flake.nix (and run `cargo generate-lockfile` afterwards)
-name = "res-soc"
-description = "A simple Rust project using Nix"
+name = "quick-start"
 version = "0.1.0"
+edition = "2021"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cargo-binstall = "1.12.2"
-clap = { version = "4.3.14", features = ["derive"] }
 dioxus-cli = "0.6.3"
