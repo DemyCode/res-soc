@@ -46,6 +46,7 @@
             pkgs.cargo
             pkgs.cargo-tauri
             pkgs.nodejs
+            pkgs.openssl
           ];
           nativeBuildInputs = [
             pkgs.at-spi2-atk
@@ -60,8 +61,11 @@
             pkgs.pango
             pkgs.webkitgtk_4_1
             pkgs.openssl
+            pkgs.pkg-config
+            pkgs.lld
           ];
-
+          LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.openssl ];
+          RUSTFLAGS = "-C linker=lld";
           # Additional environment variables can be set directly
           # MY_CUSTOM_VAR = "some value";
         };
@@ -79,12 +83,12 @@
 
         # Build the actual crate itself, reusing the dependency
         # artifacts from above.
-        my-crate =
+        res-soc =
           craneLib.buildPackage (commonArgs // { inherit cargoArtifacts; });
       in {
         checks = {
           # Build the crate as part of `nix flake check` for convenience
-          inherit my-crate;
+          my-crate = res-soc;
 
           # Run clippy (and deny all warnings) on the crate source,
           # again, reusing the dependency artifacts from above.
@@ -127,13 +131,13 @@
         };
 
         packages = {
-          default = my-crate;
+          default = res-soc;
         } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
           my-crate-llvm-coverage = craneLibLLvmTools.cargoLlvmCov
             (commonArgs // { inherit cargoArtifacts; });
         };
 
-        apps.default = flake-utils.lib.mkApp { drv = my-crate; };
+        apps.default = flake-utils.lib.mkApp { drv = res-soc; };
 
         devShells.default = craneLib.devShell {
           # Inherit inputs from checks.
