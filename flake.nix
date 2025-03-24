@@ -47,30 +47,42 @@
             pkgs.cargo-tauri
             pkgs.nodejs
             pkgs.openssl
+            pkgs.pango
+            pkgs.atkmm
+            pkgs.gdk-pixbuf
+            pkgs.gtk3
+            pkgs.webkitgtk_4_1
+            pkgs.xdotool
+            pkgs.xwayland
           ];
           nativeBuildInputs = [
             pkgs.at-spi2-atk
             pkgs.atkmm
             pkgs.cairo
             pkgs.gdk-pixbuf
+            pkgs.webkitgtk_4_1
             pkgs.glib
-            pkgs.gtk3
             pkgs.harfbuzz
             pkgs.librsvg
             pkgs.libsoup_3
             pkgs.pango
-            pkgs.webkitgtk_4_1
             pkgs.openssl
             pkgs.pkg-config
             pkgs.lld
             pkgs.libgcc
             pkgs.xdo
             pkgs.xdotool
+            pkgs.pango
+            pkgs.atkmm
+            pkgs.gtk3
+            pkgs.xdotool
+            pkgs.xwayland
           ];
           LD_LIBRARY_PATH = lib.makeLibraryPath [ pkgs.openssl ];
-          RUSTFLAGS = "-C link-arg=-fuse-ld=lld -C linker=clang";
-          GSK_RENDERER = "ngl";
-          GDK_BACKEND = "x11";
+          WAYLAND_DISPLAY = "";
+          # RUSTFLAGS = "-C link-arg=-fuse-ld=lld -C linker=clang";
+          # GSK_RENDERER = "ngl";
+          # GDK_BACKEND = "x11";
           # Additional environment variables can be set directly
           # MY_CUSTOM_VAR = "some value";
         };
@@ -144,7 +156,7 @@
 
         apps.default = flake-utils.lib.mkApp { drv = res-soc; };
 
-        devShells.default = craneLib.devShell {
+        devShells.default = craneLib.devShell ({
           # Inherit inputs from checks.
           checks = self.checks.${system};
 
@@ -155,6 +167,6 @@
           packages = [
             # pkgs.ripgrep
           ];
-        };
+        } // commonArgs);
       });
 }
