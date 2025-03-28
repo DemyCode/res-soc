@@ -5,17 +5,30 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     crane.url = "github:ipetkov/crane";
     flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, crane, flake-utils, ... }:
+  outputs = { self, nixpkgs, crane, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        craneLib = crane.mkLib pkgs;
+        pkgs = import nixpkgs {
+          system = system;
+          config.allowUnfree = true; # Enable unfree packages
+          config.android_sdk.accept_license = true;
+          overlays = [ (import rust-overlay) ];
+        };
+        craneLib = (crane.mkLib pkgs).overrideToolchain (p:
+          p.rust-bin.stable.latest.default.override {
+            targets = [ "wasm32-unknown-unknown" "aarch64-linux-android" ];
+          });
+        androidComposition =
+          pkgs.androidenv.composeAndroidPackages { includeNDK = true; };
         commonArgs = {
           src = craneLib.cleanCargoSource ./.;
           strictDeps = true;
-
           buildInputs = [
             # Add additional build inputs here
             pkgs.at-spi2-atk
@@ -32,6 +45,10 @@
             pkgs.openssl
             pkgs.lld
             pkgs.xdotool
+            pkgs.sdkmanager
+            pkgs.rustup
+            pkgs.android-studio
+            (pkgs.android-studio.withSdk androidComposition.androidsdk)
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
             pkgs.libiconv
@@ -45,8 +62,13 @@
           ];
           shellHook = ''
             export CARGO_HOME=$PWD/.cargo
+            export RUSTUP_HOME="$PWD/.rustup"
+            export PATH="$CARGO_HOME/bin:$PATH"
             cargo install -j $(nproc) --root .cargo cargo-binstall
             cargo binstall dioxus-cli
+
+            export ANDROID_HOME="${androidComposition.androidsdk}/libexec/android-sdk";
+            export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk-bundle";
           '';
         };
 
