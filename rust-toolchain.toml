@@ -1,0 +1,9 @@
+[toolchain]
+channel = "stable" # or "nightly", "beta", etc., depending on your needs
+targets = [
+  "aarch64-linux-android",
+  "armv7-linux-androideabi",
+  "i686-linux-android",
+  "x86_64-linux-android",
+  "wasm32-unknown-unknown",
+]
